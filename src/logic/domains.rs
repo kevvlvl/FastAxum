@@ -11,6 +11,11 @@ pub struct Domain {
     desc: String,
 }
 
+#[instrument(name = "get_health")]
+pub async fn get_health() -> (StatusCode, Json<String>) {
+    (StatusCode::OK, Json("Healthy!".parse().unwrap()))
+}
+
 #[instrument(name = "get_domains")]
 pub async fn get_domains(Json(payload): Json<Domain>) -> (StatusCode, Json<Domain>) {
 

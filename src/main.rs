@@ -1,3 +1,4 @@
+use std::env;
 use axum::Router;
 use axum::routing::{get, post};
 use tokio::net::TcpListener;
@@ -15,12 +16,13 @@ async fn main() {
     info!("STARTING Fast Axum - Domains API");
 
     let router = Router::new() 
-        .route("/", get(|| async {
-            "Healthy!"
-        }))
+        .route("/", get(logic::domains::get_health))
         .route("/domains", post(logic::domains::get_domains));
 
-    let listener = TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let addr = env::var("ADDRESS").unwrap_or("0.0.0.0".to_string());
+    let port = env::var("PORT").unwrap_or("3000".to_string());
+
+    let listener = TcpListener::bind(format!("{}:{}", addr, port)).await.unwrap();
 
     axum::serve(listener, router).await.unwrap()
 }
