@@ -72,7 +72,7 @@ When installed, Gitea still won't be accessible unless we create a service of ty
 
 `kubectl apply -f k8s/3-gitea-svc-lb.yaml`
 
-Now, from the host, Gitea is accessible from http://localhost:8081
+Now, on the host, Gitea is accessible from http://localhost:8081
 
 We do need an admin account (for our dev purposes), so we need to create one in Gitea using the following command
 
@@ -83,8 +83,26 @@ _Note_: Replace the pod name by the exact pod deployed and running in your k3s c
 
 Now we can login in Gitea and start creating repos which will be important for ArgoCD setup
 
-- Deploy ArgoCD
-- Deploy OTEL k8s operator
+#### Deploy ArgoCD
+
+Follow helm instructions here https://github.com/argoproj/argo-helm/tree/main/charts/argo-cd#installing-the-chart
+
+Expose argocd via a LB service to make it accessible on the host:
+
+`kubectl apply -f k8s/4-argocd-svc-lb.yaml`
+
+Now, on the host, Argocd is accessible from http://localhost:8082
+
+To login, use user admin and password from the command `kubectl -n cicd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+`
+
+Once logged in, you can change the account password. For this exercise, I chose adminpass just like gitea
+
+At this point, in Gitea, we can create an organization `devops` and a repo called `argocd` where we will host deployment files (see folder k8s/argocd-gitops).
+Then, in ArgoCD, we will connect that repository using the load balancer service address (`http://gitea-http-lb.cicd.svc.cluster.local:8081/devops/argocd.git`) and create the deployment manually in ArgoCD.
+
+From this point on, any deployment YAML we add in argocd repo will automatically trigger a deployment. You should see the cert-manager and the opentelemetry-operator successfully deployed!
+
+__TODO:__
 - Deploy Grafana OSS k8s operator
-- Deploy Buildah (for image builds)
-- Deploy the app using ArgoCD
+- Figure out best way to build and deploy app on stack (add Buildah? Build packs? ...)
