@@ -1,0 +1,55 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: Grafana
+metadata:
+  name: grafana
+  labels:
+    dashboards: "grafana"
+  namespace: monitoring
+spec:
+  config:
+    log:
+      mode: "console"
+    security:
+      admin_user: admin
+      admin_password: adminpass
+
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kev-dashboard
+  namespace: monitoring
+spec:
+  resyncPeriod: 30s
+  instanceSelector:
+    matchLabels:
+      dashboards: "grafana"
+  json: >
+    {
+      "title": "Kevs Dashboard",
+      "timezone": "browser",
+      "refresh": "5s",
+      "panels": [],
+      "time": {
+        "from": "now-6h",
+        "to": "now"
+      }
+    }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: grafana-operator
+    dashboards: grafana
+  name: grafana-svc-lb
+  namespace: monitoring
+spec:
+  ports:
+  - port: 8083
+    protocol: TCP
+    targetPort: grafana-http
+  selector:
+    app: grafana
+  type: LoadBalancer
+
