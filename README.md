@@ -98,11 +98,25 @@ To login, use user admin and password from the command `kubectl -n cicd get secr
 
 Once logged in, you can change the account password. For this exercise, I chose adminpass just like gitea
 
-At this point, in Gitea, we can create an organization `devops` and a repo called `argocd` where we will host deployment files (see folder k8s/argocd-gitops).
-Then, in ArgoCD, we will connect that repository using the load balancer service address (`http://gitea-http-lb.cicd.svc.cluster.local:8081/devops/argocd.git`) and create the deployment manually in ArgoCD.
+#### Prepare environments
 
-From this point on, any deployment YAML we add in argocd repo will automatically trigger a deployment. You should see the cert-manager and the opentelemetry-operator successfully deployed!
+Before we deploy apps, we need to create a few namespaces for the different concepts that will be deployed: `kubectl apply -f k8s/5-namespaces.yaml`
+
+We will create a namespace for the monitoring stack, for the cert-manager, and for the dev environment.
+
+#### Gitea - GitOps
+
+In Gitea:
+- Create an organization `devops`
+- Create a repo called `argocd`
+
+In this repo, we will host the files found in k8s/argocd-gitops which are ArgoCD manifests for deployments.
+Once you did this, open ArgoCD:
+- Connect the gitea repository using the load balancer service address `http://gitea-http-lb.cicd.svc.cluster.local:8081/devops/argocd.git`
+- Connect the helm repositories listed in k8s/argocd-gitops (see field spec.source.repoURL)
+- Create the deployment manually in ArgoCD to deploy from the above repo we created.
+
+This will ensure an app-of-apps pattern where ArgoCD automatically deploys any app we desire, simplifying the following tools required for deployment.
 
 __TODO:__
-- Deploy Grafana OSS k8s operator
 - Figure out best way to build and deploy app on stack (add Buildah? Build packs? ...)

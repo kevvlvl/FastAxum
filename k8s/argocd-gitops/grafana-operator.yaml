@@ -1,21 +1,18 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cert-manager-operator
+  name: grafana-operator
   namespace: cicd
 spec:
   destination:
-    namespace: cert-manager
+    namespace: monitoring
     server: https://kubernetes.default.svc
   source:
     path: .
-    repoURL: https://charts.jetstack.io
-    targetRevision: v1.18.2
-    chart: cert-manager
-    helm:
-      parameters:
-        - name: installCRDs
-          value: 'true'
+    repoURL: https://grafana.github.io/helm-charts
+    targetRevision: v5.18.0
+    chart: grafana-operator
+  sources: []
   project: default
   syncPolicy:
     automated:

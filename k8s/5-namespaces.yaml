@@ -15,3 +15,13 @@ metadata:
     argocd.argoproj.io/instance: cert-manager
     argocd.argoproj.io/managed-by: cicd
 spec: {}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  name: monitoring
+  labels:
+    argocd.argoproj.io/instance: monitoring
+    argocd.argoproj.io/managed-by: cicd
+spec: {}
