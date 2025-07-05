@@ -1,6 +1,6 @@
-# Fast Axum
+# Fast Axum with k8s Monitoring
 
-Web REST API using the Axum Rust framework
+Web REST API using the Axum Rust framework deployable using podman or on k8s with a comprehensive ci-cd and monitoring stack
 
 ## Using Podman
 
@@ -114,9 +114,12 @@ In this repo, we will host the files found in k8s/argocd-gitops which are ArgoCD
 Once you did this, open ArgoCD:
 - Connect the gitea repository using the load balancer service address `http://gitea-http-lb.cicd.svc.cluster.local:8081/devops/argocd.git`
 - Connect the helm repositories listed in k8s/argocd-gitops (see field spec.source.repoURL)
-- Create the deployment manually in ArgoCD to deploy from the above repo we created.
+- Create two ArgoCD deployments manually: one pointing to `argocd-gitops` (app of apps) and one to `argocd-crds`
 
 This will ensure an app-of-apps pattern where ArgoCD automatically deploys any app we desire, simplifying the following tools required for deployment.
 
 __TODO:__
-- Figure out best way to build and deploy app on stack (add Buildah? Build packs? ...)
+- Build and deploy my app on k3s
+- View traces in Grafana
+
+**Done** -> argoCD -> otel + otel collector + grafana + tempo + grafana data source
