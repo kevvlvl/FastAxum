@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: server-conf
+data:
+  index.js: |
+    const express = require('express');
+    const app = express();
+    app.get('/', (req, res) => res.send('Hello from k8s!'));
+    app.listen(3000, () => console.log('Listening on port 3000'));
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: sampleapp
+  name: sampleapp
+  namespace: dev
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sampleapp
+  template:
+    metadata:
+      labels:
+        app: sampleapp
+      annotations:
+        instrumentation.opentelemetry.io/inject-nodejs: "true"
+    spec:
+      initContainers:
+        - name: install-dependencies
+          image: node:24-alpine
+          command:
+            - sh
+            - -c
+            - |
+              mkdir -p /app && \
+              cp /conf/index.js /app/index.js && \
+              cd /app && npm init -y && npm install express
+          workingDir: /app
+          volumeMounts:
+            - name: build-vol
+              mountPath: /app
+            - name: server-conf
+              mountPath: /conf
+      containers:
+        - name: sampleapp
+          image: node:24-alpine
+          command: ["node", "/app/index.js"]
+          ports:
+            - containerPort: 3000
+          volumeMounts:
+            - name: build-vol
+              mountPath: /app
+      volumes:
+        - name: server-conf
+          configMap:
+            name: server-conf
+        - name: build-vol
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: sampleapp
+  name: sampleapp
+  namespace: dev
+spec:
+  ports:
+    - port: 3000
+      protocol: TCP
+      targetPort: 3000
+  selector:
+    app: sampleapp
+  type: LoadBalancer

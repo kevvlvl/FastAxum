@@ -107,19 +107,19 @@ We will create a namespace for the monitoring stack, for the cert-manager, and f
 #### Gitea - GitOps
 
 In Gitea:
-- Create an organization `devops`
-- Create a repo called `argocd`
+Create an organization `devops`. Then, create a repo called `argocd`
 
-In this repo, we will host the files found in k8s/argocd-gitops which are ArgoCD manifests for deployments.
-Once you did this, open ArgoCD:
-- Connect the gitea repository using the load balancer service address `http://gitea-http-lb.cicd.svc.cluster.local:8081/devops/argocd.git`
-- Connect the helm repositories listed in k8s/argocd-gitops (see field spec.source.repoURL)
-- Create two ArgoCD deployments manually: one pointing to `argocd-gitops` (app of apps) and one to `argocd-crds`
+In this repo, we will host the files found in k8s/argocd-gitops which are ArgoCD manifests for deployments. 
 
-This will ensure an app-of-apps pattern where ArgoCD automatically deploys any app we desire, simplifying the following tools required for deployment.
+1. Connect the gitea repository using the load balancer service address `http://gitea-http-lb.cicd.svc.cluster.local:8081/devops/argocd.git`
+2. Connect the helm repositories listed in k8s/argocd-gitops (see field spec.source.repoURL)
 
-__TODO:__
-- Build and deploy my app on k3s
-- View traces in Grafana
+Then, create a repo called `crds`
 
-**Done** -> argoCD -> otel + otel collector + grafana + tempo + grafana data source
+In this repo, we will host the files found in k8s/argocd-crds which are operator CRDs for deployments
+
+Once this is done, create an organization `dev`. Then, create a repo called `api`
+
+In this repo, we will host the app deployment in k8s/argocd-app
+
+Once you did this, open ArgoCD and create one ArgoCD deployments manually: one pointing to `argocd-gitops` (app of apps). This will ensure an app-of-apps pattern where ArgoCD automatically deploys any app we desire, simplifying the following tools required for deployment.
